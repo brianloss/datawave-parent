@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>gov.nsa.datawave.microservice</groupId>
     <artifactId>datawave-microservice-parent</artifactId>
-    <version>1.9-SNAPSHOT</version>
+    <version>1.8-fork-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>DataWave Microservices Parent</name>
     <description>DataWave mircoservices provide functionality previously contained in the DataWave
@@ -17,17 +17,16 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:https://github.com/NationalSecurityAgency/datawave-parent.git</connection>
-        <developerConnection>scm:git:git@github.com:NationalSecurityAgency/datawave-parent.git</developerConnection>
+        <connection>scm:git:https://github.com/brianloss/datawave-parent.git</connection>
+        <developerConnection>scm:git:git@github.com:brianloss/datawave-parent.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/NationalSecurityAgency/datawave-parent</url>
+        <url>https://github.com/brianloss/datawave-parent</url>
     </scm>
     <distributionManagement>
         <repository>
-            <!-- NOTE: This section can go away once we are able to publish artifacts to maven central. -->
-            <id>internal.repo</id>
-            <name>Temporary Staging Repository</name>
-            <url>file://${project.build.directory}/mvn-repo</url>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/brianloss/datawave</url>
         </repository>
     </distributionManagement>
     <properties>
@@ -86,22 +85,27 @@
             <id>datawave-github-mvn-repo</id>
             <url>https://raw.githubusercontent.com/NationalSecurityAgency/datawave/mvn-repo</url>
         </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/brianloss/datawave</url>
+        </repository>
     </repositories>
     <pluginRepositories>
-        <!--
-            This is a temporary work-around until we can publish artifacts to maven central.
-            This allows us to download the read-properties and assert-properties plugins, as
-            well as the datawave code style template for the formatter-maven-plugin.
-        -->
         <pluginRepository>
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
-            <id>datawave-github-mvn-repo</id>
-            <url>https://raw.githubusercontent.com/NationalSecurityAgency/datawave/mvn-repo</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/brianloss/*</url>
         </pluginRepository>
     </pluginRepositories>
     <build>
@@ -200,7 +204,7 @@
                         <dependency>
                             <groupId>gov.nsa.datawave</groupId>
                             <artifactId>datawave-code-style</artifactId>
-                            <version>1.0</version>
+                            <version>1.0-fork</version>
                         </dependency>
                     </dependencies>
                     <configuration>
@@ -215,6 +219,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -273,46 +282,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <!-- NOTE: This plugin can go away once we are able to publish artifacts to maven central. -->
-                <groupId>com.github.github</groupId>
-                <artifactId>site-maven-plugin</artifactId>
-                <version>0.12</version>
-                <executions>
-                    <!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>site</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <message>Maven artifacts for ${project.name} ${project.version}</message>
-                    <!-- git commit message -->
-                    <noJekyll>true</noJekyll>
-                    <!-- disable webpage processing -->
-                    <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-                    <!-- matches distribution management repository url above -->
-                    <branch>refs/heads/mvn-repo</branch>
-                    <!-- use the NationalSecurityAgency/datawave repo's mvn-repo branch, not the current repo -->
-                    <repositoryOwner>NationalSecurityAgency</repositoryOwner>
-                    <repositoryName>datawave</repositoryName>
-                    <!-- remote branch name -->
-                    <includes>
-                        <include>**/*</include>
-                    </includes>
-                    <merge>true</merge>
-                </configuration>
-            </plugin>
-            <plugin>
-                <!-- NOTE: This plugin can go away once we are able to publish artifacts to maven central. -->
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <configuration>
-                    <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -429,7 +398,7 @@
                         <executions>
                             <!-- build javadoc jars per module for publishing to the repo -->
                             <execution>
-                                <id>module-apidocs</id>
+                                <id>attach-javadocs</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
@@ -479,7 +448,7 @@
                         <executions>
                             <!-- Build source jars and attach them to the project for publishing -->
                             <execution>
-                                <id>datawave-java-sources</id>
+                                <id>attach-sources</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jar-no-fork</goal>
